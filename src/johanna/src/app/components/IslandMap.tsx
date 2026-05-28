@@ -988,10 +988,11 @@ interface IslandMapProps {
   buildings: Building[];
   onBuildingClick: (building: Building) => void;
   level: number; xp: number; maxXp: number;
+  sustainabilityTrees?: number;
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export function IslandMap({ buildings, onBuildingClick }: IslandMapProps) {
+export function IslandMap({ buildings, onBuildingClick, sustainabilityTrees = 0 }: IslandMapProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const buildMap = Object.fromEntries(buildings.map(b => [b.id, b]));
 
@@ -1154,6 +1155,92 @@ export function IslandMap({ buildings, onBuildingClick }: IslandMapProps) {
         <IsoTree ix={ 0.8} iz={ 5.5} h={0.80} />
         <IsoTree ix={ 5.5} iz={ 2.5} h={0.75} />
         <IsoTree ix={-0.5} iz={ 3.0} h={0.70} />
+
+        {/* Sustainability trees — planted by eco-swaps */}
+        {(() => {
+          const SUSTAINABILITY_POSITIONS: [number, number, number][] = [
+            [-3.5, 1.0, 1.30],
+            [ 3.5, 1.5, 1.25],
+            [-1.5, 4.5, 1.20],
+            [ 1.0, 3.5, 1.15],
+            [-4.5, 2.5, 1.28],
+            [ 5.0, 3.8, 1.22],
+            [-2.8, -2.0, 1.18],
+            [ 3.8, -1.5, 1.26],
+            [-5.0, -1.5, 1.12],
+            [ 0.0, 5.0, 1.23],
+            [ 2.8, -3.8, 1.16],
+            [-3.8, 4.8, 1.20],
+          ];
+          return SUSTAINABILITY_POSITIONS.slice(0, sustainabilityTrees).map(([tix, tiz, th], i) => {
+            const treeBase = iso(tix, tiz, GH);
+            const treeTrunk = iso(tix, tiz, GH + th * 0.4);
+            const treeTop = iso(tix, tiz, GH + th);
+            return (
+              <motion.g
+                key={`st-${i}`}
+                initial={{ scale: 0, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                transition={{ type: "spring", damping: 10, stiffness: 120, delay: i * 0.15 }}
+              >
+                {/* Glow ring at base */}
+                <ellipse
+                  cx={treeBase[0]} cy={treeBase[1] + 2}
+                  rx={18} ry={8}
+                  fill="#5cc06a" opacity="0.35"
+                >
+                  <animate attributeName="rx" values="16;22;16" dur="2.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.35;0.15;0.35" dur="2.5s" repeatCount="indefinite" />
+                </ellipse>
+
+                {/* Trunk — thicker, richer brown */}
+                <line x1={treeBase[0]} y1={treeBase[1]} x2={treeTrunk[0]} y2={treeTrunk[1]}
+                  stroke="#5a3310" strokeWidth="6" strokeLinecap="round" />
+
+                {/* Lush canopy — bigger, more vibrant greens */}
+                <circle cx={treeTop[0]} cy={treeTop[1] + 6}  r={20 * th} fill="#1a6b22" />
+                <circle cx={treeTop[0]} cy={treeTop[1] + 1}  r={18 * th} fill="#28882e" />
+                <circle cx={treeTop[0]} cy={treeTop[1] - 5}  r={15 * th} fill="#3aad40" />
+                <circle cx={treeTop[0]} cy={treeTop[1] - 11} r={11 * th} fill="#52cc58" />
+                <circle cx={treeTop[0]} cy={treeTop[1] - 16} r={7 * th}  fill="#78e87e" />
+
+                {/* Highlight shimmer on canopy */}
+                <circle cx={treeTop[0] - 4} cy={treeTop[1] - 8} r={5 * th} fill="rgba(255,255,255,0.25)">
+                  <animate attributeName="opacity" values="0.25;0.08;0.25" dur="3s" repeatCount="indefinite" />
+                </circle>
+
+                {/* Sparkle particles floating up */}
+                {[0, 1, 2].map(si => (
+                  <circle key={si}
+                    cx={treeTop[0] + (si - 1) * 8}
+                    cy={treeTop[1] - 14}
+                    r="2.5"
+                    fill="#ffe66d"
+                    opacity="0.9"
+                  >
+                    <animate attributeName="cy"
+                      values={`${treeTop[1] - 10};${treeTop[1] - 30};${treeTop[1] - 10}`}
+                      dur={`${2 + si * 0.5}s`} repeatCount="indefinite" />
+                    <animate attributeName="opacity"
+                      values="0.9;0;0.9"
+                      dur={`${2 + si * 0.5}s`} repeatCount="indefinite" />
+                  </circle>
+                ))}
+
+                {/* Leaf emoji floating above */}
+                <text
+                  x={treeTop[0]} y={treeTop[1] - 22}
+                  textAnchor="middle" dominantBaseline="middle"
+                  fontSize="10" opacity="0.9"
+                >
+                  🌿
+                  <animateTransform attributeName="transform" type="translate"
+                    values="0,0; 0,-5; 0,0" dur="2.5s" repeatCount="indefinite" additive="sum" />
+                </text>
+              </motion.g>
+            );
+          });
+        })()}
 
         {/* Ground flowers */}
         {[

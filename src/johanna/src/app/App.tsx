@@ -8,6 +8,7 @@ import { MapPin, Menu, X, Sparkles } from "lucide-react";
 import confetti from "canvas-confetti";
 import { FavoritesPanel } from "./components/FavoritesPanel";
 import { OrderTracker, type Order } from "./components/OrderTracker";
+import { SustainableSwapPanel } from "./components/SustainableSwapPanel";
 
 // Martin & Servera brand color system
 const MS = {
@@ -211,6 +212,9 @@ export default function App() {
   const [shouldOpenAnalyticsAfterOrder, setShouldOpenAnalyticsAfterOrder] = useState(false);
   const [showAfterOrderMessage, setShowAfterOrderMessage] = useState(false);
   const [showInventoryReminder, setShowInventoryReminder] = useState(false);
+  const [sustainSwapOpen, setSustainSwapOpen] = useState(false);
+  const [swappedProducts, setSwappedProducts] = useState<Set<string>>(new Set());
+  const [sustainabilityTrees, setSustainabilityTrees] = useState(0);
 
   const maxXp = level * 300;
 
@@ -309,6 +313,13 @@ export default function App() {
   }
 
   const completedCount = completedIds.size;
+
+  function handleSustainableSwap(originalId: string, _alternative: { id: string; name: string }) {
+    if (swappedProducts.has(originalId)) return;
+    const newSwapped = new Set([...swappedProducts, originalId]);
+    setSwappedProducts(newSwapped);
+    setSustainabilityTrees(prev => prev + 1);
+  }
 
   function handleOrderTrackerClose() {
     setOrderTrackerOpen(false);
@@ -521,6 +532,7 @@ export default function App() {
               level={level}
               xp={xp}
               maxXp={maxXp}
+              sustainabilityTrees={sustainabilityTrees}
             />
             </div>
           </motion.div>
@@ -726,6 +738,21 @@ export default function App() {
           }
         }}
         onOrder={handlePlaceOrder}
+        onOpenSustainSwap={() => {
+          setFavPanelOpen(false);
+          setTimeout(() => setSustainSwapOpen(true), 200);
+        }}
+        sustainabilityTrees={sustainabilityTrees}
+      />
+
+      {/* Sustainable swap panel */}
+      <SustainableSwapPanel
+        open={sustainSwapOpen}
+        onClose={() => setSustainSwapOpen(false)}
+        favorites={savedFavorites}
+        onSwap={handleSustainableSwap}
+        swappedProducts={swappedProducts}
+        treeCount={sustainabilityTrees}
       />
 
       {/* Order tracker */}

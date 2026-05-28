@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { X, Star, ShoppingCart, Pencil } from "lucide-react";
+import { X, Star, ShoppingCart, Pencil, Leaf } from "lucide-react";
 import { MOCK_PRODUCTS } from "./ProductList";
 import confetti from "canvas-confetti";
 
@@ -19,9 +19,11 @@ interface FavoritesPanelProps {
   favorites: Record<string, number>;
   onEdit: () => void;
   onOrder: () => void;
+  onOpenSustainSwap?: () => void;
+  sustainabilityTrees?: number;
 }
 
-export function FavoritesPanel({ open, onClose, favorites, onEdit, onOrder }: FavoritesPanelProps) {
+export function FavoritesPanel({ open, onClose, favorites, onEdit, onOrder, onOpenSustainSwap, sustainabilityTrees = 0 }: FavoritesPanelProps) {
   const items = MOCK_PRODUCTS.filter(p => (favorites[p.id] ?? 0) > 0);
   const totalUnits = Object.values(favorites).reduce((s, q) => s + q, 0);
 
@@ -148,9 +150,42 @@ export function FavoritesPanel({ open, onClose, favorites, onEdit, onOrder }: Fa
 
             {/* Footer */}
             <div
-              className="flex-shrink-0 px-5 py-4 flex gap-3"
+              className="flex-shrink-0 px-5 py-4 space-y-3"
               style={{ background: MS.cream, borderTop: "1px solid rgba(0,107,63,0.1)" }}
             >
+              {/* Sustainability swap CTA */}
+              {items.length > 0 && onOpenSustainSwap && (
+                <motion.button
+                  className="w-full py-3 rounded-2xl flex items-center justify-center gap-2.5"
+                  style={{
+                    background: "linear-gradient(135deg, #1a5c2a, #2d8f3e)",
+                    color: "white",
+                    fontFamily: "Nunito, sans-serif",
+                    fontWeight: 800,
+                    fontSize: "0.88rem",
+                    boxShadow: "0 4px 16px rgba(45,143,62,0.3)",
+                    border: "none",
+                  }}
+                  onClick={onOpenSustainSwap}
+                  whileHover={{ scale: 1.02, boxShadow: "0 6px 22px rgba(45,143,62,0.4)" }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <motion.span
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Leaf size={16} />
+                  </motion.span>
+                  Upptäck hållbara byten
+                  {sustainabilityTrees > 0 && (
+                    <span className="ml-1 px-2 py-0.5 rounded-full text-[0.7rem]" style={{ background: "rgba(255,255,255,0.25)" }}>
+                      🌳 {sustainabilityTrees}
+                    </span>
+                  )}
+                </motion.button>
+              )}
+
+              <div className="flex gap-3">
               <motion.button
                 className="flex-1 py-3 rounded-2xl flex items-center justify-center gap-2"
                 style={{
@@ -186,6 +221,7 @@ export function FavoritesPanel({ open, onClose, favorites, onEdit, onOrder }: Fa
                 <ShoppingCart size={15} />
                 Beställ favoriter
               </motion.button>
+              </div>
             </div>
           </motion.div>
         </>
