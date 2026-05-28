@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 import { ChefHat, ShoppingBag, BarChart3, Truck } from "lucide-react";
+import msLogo from "../../imports/ms-app-logo.webp";
 
 const roles = [
   { id: "chef", label: "Köksmästare", emoji: "👨‍🍳", desc: "Beställer råvaror och planerar menyer" },
@@ -59,31 +60,18 @@ export function WelcomeScreen({ onComplete }: WelcomeScreenProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", damping: 20 }}
           >
-            {/* M&S Logo area — 3D spinning cube face */}
-            <div style={{ perspective: "600px", width: "96px", height: "96px", margin: "0 auto 1.5rem" }}>
-              <motion.div
-                className="w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl"
-                style={{
-                  background: "linear-gradient(135deg, #006b3f, #4a9060)",
-                  transformStyle: "preserve-3d",
-                }}
+            {/* M&S Logo */}
+            <div style={{ width: "120px", height: "120px", margin: "0 auto 1.5rem" }}>
+              <motion.img
+                src={msLogo}
+                alt="Martin & Servera"
+                className="w-full h-full object-cover"
+                style={{ borderRadius: "28px", boxShadow: "0 8px 32px rgba(0,107,63,0.25)" }}
                 animate={{
-                  rotateY: [0, 15, -15, 0],
-                  rotateX: [0, -8, 8, 0],
-                  y: [0, -10, 0],
+                  scale: [1, 1.03, 1],
                 }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                {/* Top face shine */}
-                <div
-                  className="absolute inset-0 rounded-3xl"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(255,255,255,0.35) 0%, transparent 60%)",
-                    pointerEvents: "none",
-                  }}
-                />
-                <span style={{ fontSize: "3rem", position: "relative", zIndex: 1 }}>🌿</span>
-              </motion.div>
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
             </div>
 
             <motion.h1
