@@ -32,9 +32,10 @@ interface FeatureModalProps {
   savedFavorites?: Record<string, number>;
   openProductList?: boolean;
   showAfterOrderMessage?: boolean;
+  onOpenFavorites?: () => void;
 }
 
-export function FeatureModal({ feature, onClose, onComplete, completed, onSaveFavorites, savedFavorites, openProductList, showAfterOrderMessage }: FeatureModalProps) {
+export function FeatureModal({ feature, onClose, onComplete, completed, onSaveFavorites, savedFavorites, openProductList, showAfterOrderMessage, onOpenFavorites }: FeatureModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepsDone, setStepsDone] = useState<Set<number>>(new Set());
   const [showProductList, setShowProductList] = useState(openProductList ?? false);
@@ -76,6 +77,18 @@ export function FeatureModal({ feature, onClose, onComplete, completed, onSaveFa
     // Special handling: open product list for "Skapa din favoratlista" step in Butiken
     if (feature.id === "ecommerce" && idx === 1 && !stepsDone.has(idx)) {
       setShowProductList(true);
+    }
+    // Special handling: open favorites panel for "Lägg din första beställning" step in Butiken
+    else if (feature.id === "ecommerce" && idx === 2 && !stepsDone.has(idx)) {
+      handleStepDone(idx);
+      // If all steps are now done, trigger completion (XP + unlock buildings)
+      const allStepsDone = feature.steps.every((_, i) => i === idx || stepsDone.has(i));
+      if (allStepsDone) {
+        onComplete(feature.id, feature.xpReward);
+      }
+      if (onOpenFavorites) {
+        onOpenFavorites();
+      }
     }
     // Special handling: open app download URL for "Ladda ner appen" step in Appen
     else if (feature.id === "app" && idx === 0 && !stepsDone.has(idx)) {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import butikenLogo from "../../imports/Ska_rmavbild_2026-05-28_kl._12.14.38.png";
 
 // ─── Isometric engine ─────────────────────────────────────────────────────────
@@ -50,9 +50,9 @@ const BUILD_ISO: Record<string, {
   ecommerce: { ix:  1.8, iz: -4.8, w: 1.8, d: 1.8, h: 2.0, color: "#30885a", accent: "#d4a843" },
   account:   { ix: -4.5, iz: -4.0, w: 1.6, d: 1.6, h: 2.2, color: "#6848a8", accent: "#b088e8" },
   inventory: { ix:  4.2, iz:  0.2, w: 1.8, d: 1.8, h: 1.8, color: "#a87820", accent: "#d4a843" },
-  app:       { ix: -5.5, iz:  0.8, w: 1.6, d: 1.6, h: 2.0, color: "#4268b8", accent: "#90b8e8" },
+  app:       { ix: -5.5, iz:  0.8, w: 1.6, d: 1.6, h: 2.0, color: "#375D44", accent: "#90b8e8" },
   delivery:  { ix:  2.0, iz:  4.0, w: 1.8, d: 1.8, h: 1.6, color: "#308868", accent: "#70b898" },
-  analytics: { ix: -4.8, iz:  3.5, w: 1.6, d: 1.6, h: 3.2, color: "#b04848", accent: "#e89090" },
+  analytics: { ix: -4.8, iz:  3.5, w: 1.6, d: 1.6, h: 3.2, color: "#5C3A2E", accent: "#E8E0D8" },
 };
 
 // Painter's order: sort buildings back-to-front by (ix + iz) ascending
@@ -175,7 +175,7 @@ function IsoBuilding({
 
         {/* ── South wall (farthest — render first) ── */}
         <polygon points={pts(southWall)} fill={southColor} stroke="rgba(0,0,0,0.11)" strokeWidth="0.7" />
-        {!locked && winES.map(([u1, v1, u2, v2], wi) => (
+        {!locked && id !== "analytics" && winES.map(([u1, v1, u2, v2], wi) => (
           <polygon key={`ws${wi}`}
             points={pts([iso(ix+u1, iz+d, gy+v1), iso(ix+u2, iz+d, gy+v1), iso(ix+u2, iz+d, gy+v2), iso(ix+u1, iz+d, gy+v2)])}
             fill={winShad} stroke="rgba(0,0,0,0.15)" strokeWidth="0.5"
@@ -184,7 +184,7 @@ function IsoBuilding({
 
         {/* ── East wall ── */}
         <polygon points={pts(eastWall)} fill={eastColor} stroke="rgba(0,0,0,0.11)" strokeWidth="0.7" />
-        {!locked && winES.map(([u1, v1, u2, v2], wi) => (
+        {!locked && id !== "analytics" && winES.map(([u1, v1, u2, v2], wi) => (
           <polygon key={`we${wi}`}
             points={pts([iso(ix+w, iz+u1, gy+v1), iso(ix+w, iz+u2, gy+v1), iso(ix+w, iz+u2, gy+v2), iso(ix+w, iz+u1, gy+v2)])}
             fill={winShad} stroke="rgba(0,0,0,0.15)" strokeWidth="0.5"
@@ -193,21 +193,57 @@ function IsoBuilding({
 
         {/* ── West wall (lit) ── */}
         <polygon points={pts(westWall)} fill={westColor} stroke="rgba(0,0,0,0.11)" strokeWidth="0.7" />
-        {!locked && winNW.map(([u1, v1, u2, v2], wi) => (
+        {!locked && id !== "analytics" && winNW.map(([u1, v1, u2, v2], wi) => (
           <polygon key={`ww${wi}`}
             points={pts([iso(ix, iz+u1, gy+v1), iso(ix, iz+u2, gy+v1), iso(ix, iz+u2, gy+v2), iso(ix, iz+u1, gy+v2)])}
             fill={winLit} stroke="rgba(0,0,0,0.15)" strokeWidth="0.5"
           />
         ))}
+        {/* Analytics: multi-floor windows on west wall only */}
+        {!locked && id === "analytics" && (() => {
+          const floors = [0.08, 0.28, 0.48, 0.68];
+          const winH = 0.14;
+          const cols = [[0.15, 0.42], [0.58, 0.85]];
+          return floors.map((floorY, fi) =>
+            cols.map(([z1f, z2f], ci) => {
+              const z1 = iz + d * z1f, z2 = iz + d * z2f;
+              const y1 = gy + h * (floorY), y2 = gy + h * (floorY + winH);
+              return (
+                <polygon key={`aw${fi}-${ci}`}
+                  points={pts([iso(ix, z1, y1), iso(ix, z2, y1), iso(ix, z2, y2), iso(ix, z1, y2)])}
+                  fill="rgba(180,220,255,0.80)" stroke="rgba(0,0,0,0.18)" strokeWidth="0.5"
+                />
+              );
+            })
+          );
+        })()}
 
         {/* ── North wall (lit) + door ── */}
         <polygon points={pts(northWall)} fill={northColor} stroke="rgba(0,0,0,0.11)" strokeWidth="0.7" />
-        {!locked && winNW.map(([u1, v1, u2, v2], wi) => (
+        {!locked && id !== "analytics" && winNW.map(([u1, v1, u2, v2], wi) => (
           <polygon key={`wn${wi}`}
             points={pts([iso(ix+u1, iz, gy+v1), iso(ix+u2, iz, gy+v1), iso(ix+u2, iz, gy+v2), iso(ix+u1, iz, gy+v2)])}
             fill={winLit} stroke="rgba(0,0,0,0.15)" strokeWidth="0.5"
           />
         ))}
+        {/* Analytics: multi-floor windows on north wall only */}
+        {!locked && id === "analytics" && (() => {
+          const floors = [0.08, 0.28, 0.48, 0.68];
+          const winH = 0.14;
+          const cols = [[0.15, 0.42], [0.58, 0.85]];
+          return floors.map((floorY, fi) =>
+            cols.map(([x1f, x2f], ci) => {
+              const x1 = ix + w * x1f, x2 = ix + w * x2f;
+              const y1 = gy + h * (floorY), y2 = gy + h * (floorY + winH);
+              return (
+                <polygon key={`an${fi}-${ci}`}
+                  points={pts([iso(x1, iz, y1), iso(x2, iz, y1), iso(x2, iz, y2), iso(x1, iz, y2)])}
+                  fill="rgba(180,220,255,0.80)" stroke="rgba(0,0,0,0.18)" strokeWidth="0.5"
+                />
+              );
+            })
+          );
+        })()}
         {!locked && (
           <>
             <polygon points={pts(doorPts)} fill={darken(col, 0.42)} stroke="rgba(0,0,0,0.2)" strokeWidth="0.5" />
@@ -291,8 +327,13 @@ function IsoBuilding({
         )}
 
         {/* ── Inventory warehouse boxes ── */}
-        {id === "inventory" && !locked && (
-          <>
+        <AnimatePresence>
+        {id === "inventory" && !locked && !completed && (
+          <motion.g
+            initial={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.6, rotate: 15, filter: "blur(6px)" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
             {/* Left side — tall stack of boxes */}
             <g transform={`translate(${BLB[0] - 18}, ${BLB[1] - 8})`}>
               {/* Bottom box */}
@@ -389,8 +430,9 @@ function IsoBuilding({
               <rect x="10" y="-7" width="6" height="3" fill="#ff6b6b" opacity="0.8" />
               <text x="13" y="-4.5" textAnchor="middle" fontSize="2" fill="white" fontWeight="700">!</text>
             </g>
-          </>
+          </motion.g>
         )}
+        </AnimatePresence>
 
         {/* ── Grocery store decorations ── */}
         {isGroceryStore && !locked && (
@@ -531,6 +573,114 @@ function IsoBuilding({
           </>
         )}
 
+        {/* ── Analytics office decorations ── */}
+        {id === "analytics" && !locked && (
+          <>
+            {/* Satellite dish on roof */}
+            <g transform={`translate(${RBLT[0] + 4}, ${RBLT[1] - 16})`}>
+              {/* Dish pole */}
+              <line x1="0" y1="16" x2="0" y2="6" stroke="#8a8a8a" strokeWidth="1.5" />
+              {/* Dish */}
+              <ellipse cx="0" cy="4" rx="6" ry="3.5" fill="#d0d0d0" stroke="#999" strokeWidth="0.5" />
+              <ellipse cx="0" cy="4" rx="4" ry="2.2" fill="#e8e8e8" />
+              {/* Receiver arm */}
+              <line x1="0" y1="4" x2="2" y2="-2" stroke="#666" strokeWidth="0.8" />
+              <circle cx="2" cy="-2" r="1" fill="#4285F4" />
+            </g>
+
+            {/* Large monitor/screen on north wall */}
+            <g>
+              {(() => {
+                const sx = ix + w * 0.15, sx2 = ix + w * 0.85;
+                const sy1 = gy + h * 0.35, sy2 = gy + h * 0.75;
+                const screenPts = [
+                  iso(sx, iz, sy1), iso(sx2, iz, sy1),
+                  iso(sx2, iz, sy2), iso(sx, iz, sy2),
+                ] as Array<[number, number]>;
+                return (
+                  <>
+                    {/* Screen bezel */}
+                    <polygon points={pts(screenPts)} fill="#1a1a2e" stroke="#333" strokeWidth="0.8" />
+                    {/* Screen content - bar chart */}
+                    {[0.25, 0.40, 0.55, 0.70].map((offset, bi) => {
+                      const barH = [0.55, 0.72, 0.45, 0.85][bi];
+                      const barColor = ["#4285F4", "#34A853", "#FBBC05", "#EA4335"][bi];
+                      const bx1 = ix + w * (offset - 0.02), bx2 = ix + w * (offset + 0.06);
+                      const by1 = gy + h * (0.75 - barH * 0.35), by2 = gy + h * 0.73;
+                      const barPts = [
+                        iso(bx1, iz, by1), iso(bx2, iz, by1),
+                        iso(bx2, iz, by2), iso(bx1, iz, by2),
+                      ] as Array<[number, number]>;
+                      return <polygon key={bi} points={pts(barPts)} fill={barColor} opacity="0.9" />;
+                    })}
+                  </>
+                );
+              })()}
+            </g>
+
+            {/* Smaller screen on west wall */}
+            <g>
+              {(() => {
+                const sy1 = gy + h * 0.4, sy2 = gy + h * 0.7;
+                const sz1 = iz + d * 0.2, sz2 = iz + d * 0.75;
+                const screenPts = [
+                  iso(ix, sz1, sy1), iso(ix, sz2, sy1),
+                  iso(ix, sz2, sy2), iso(ix, sz1, sy2),
+                ] as Array<[number, number]>;
+                return (
+                  <>
+                    <polygon points={pts(screenPts)} fill="#1a1a2e" stroke="#333" strokeWidth="0.6" />
+                    {/* Pie chart */}
+                    {(() => {
+                      const cx2 = (screenPts[0][0] + screenPts[1][0]) / 2;
+                      const cy2 = (screenPts[0][1] + screenPts[2][1]) / 2;
+                      return (
+                        <>
+                          <circle cx={cx2} cy={cy2} r="5" fill="#4285F4" />
+                          <path d={`M ${cx2} ${cy2} L ${cx2} ${cy2-5} A 5 5 0 0 1 ${cx2+4.3} ${cy2+2.5} Z`} fill="#34A853" />
+                          <path d={`M ${cx2} ${cy2} L ${cx2+4.3} ${cy2+2.5} A 5 5 0 0 1 ${cx2-2} ${cy2+4.6} Z`} fill="#FBBC05" />
+                        </>
+                      );
+                    })()}
+                  </>
+                );
+              })()}
+            </g>
+
+            {/* Google-colored accent stripe at base */}
+            {(() => {
+              const stripeH = 0.12;
+              const stripePts = [
+                iso(ix, iz, gy), iso(ix + w, iz, gy),
+                iso(ix + w, iz, gy + stripeH), iso(ix, iz, gy + stripeH),
+              ] as Array<[number, number]>;
+              return <polygon points={pts(stripePts)} fill="#4285F4" opacity="0.7" />;
+            })()}
+
+            {/* Potted plant by entrance */}
+            <g transform={`translate(${BLB[0] - 8}, ${BLB[1] + 2})`}>
+              {/* Pot */}
+              <rect x="0" y="4" width="7" height="6" rx="1" fill="#8B4513" stroke="#5a3a20" strokeWidth="0.4" />
+              <rect x="-0.5" y="3" width="8" height="2" rx="1" fill="#6b3a1a" />
+              {/* Plant */}
+              <circle cx="3.5" cy="0" r="4" fill="#2d8030" />
+              <circle cx="3.5" cy="-3" r="3" fill="#3a9940" />
+              <circle cx="1.5" cy="-1" r="2.5" fill="#45a845" />
+              <circle cx="5.5" cy="-1" r="2.5" fill="#45a845" />
+            </g>
+
+            {/* Second potted plant */}
+            <g transform={`translate(${BRB[0] + 2}, ${BRB[1] + 2})`}>
+              <rect x="0" y="4" width="7" height="6" rx="1" fill="#8B4513" stroke="#5a3a20" strokeWidth="0.4" />
+              <rect x="-0.5" y="3" width="8" height="2" rx="1" fill="#6b3a1a" />
+              <circle cx="3.5" cy="0" r="4" fill="#2d8030" />
+              <circle cx="3.5" cy="-3" r="3" fill="#3a9940" />
+              <circle cx="1.5" cy="-1" r="2.5" fill="#45a845" />
+              <circle cx="5.5" cy="-1" r="2.5" fill="#45a845" />
+            </g>
+          </>
+        )}
+
         {/* ── Name label (neon for grocery store) ── */}
         {isGroceryStore ? (
           <>
@@ -549,22 +699,22 @@ function IsoBuilding({
             <rect x={labelPos[0] - name.length * 5.5} y={labelPos[1]-2} width={name.length * 11} height="22" rx="4" fill="rgba(20,20,20,0.85)" />
             {/* Neon glow layers */}
             <text x={labelPos[0]} y={labelPos[1]+10} textAnchor="middle" dominantBaseline="middle"
-              fontSize="12" fill="#22c55e" fontWeight="900" fontFamily="Nunito, sans-serif" filter="url(#neonGlow)">
-              {name}
+              fontSize="12" fill="#22c55e" fontWeight="900" fontFamily="Kalam, cursive" filter="url(#neonGlow)">
+              {name.toUpperCase()}
               <animate attributeName="opacity" values="0.85;1;0.85" dur="2s" repeatCount="indefinite" />
             </text>
             {/* Bright core */}
             <text x={labelPos[0]} y={labelPos[1]+10} textAnchor="middle" dominantBaseline="middle"
-              fontSize="12" fill="#4ade80" fontWeight="900" fontFamily="Nunito, sans-serif">
-              {name}
+              fontSize="12" fill="#4ade80" fontWeight="900" fontFamily="Kalam, cursive">
+              {name.toUpperCase()}
             </text>
           </>
         ) : (
           <>
             <rect x={labelPos[0] - name.length * 4.2} y={labelPos[1]+2} width={name.length * 8.4} height="16" rx="8" fill="rgba(10,30,10,0.65)" />
             <text x={labelPos[0]} y={labelPos[1]+10} textAnchor="middle" dominantBaseline="middle"
-              fontSize="9" fill="white" fontWeight="700" fontFamily="Nunito, sans-serif">
-              {name}
+              fontSize="9" fill="white" fontWeight="700" fontFamily="Kalam, cursive">
+              {name.toUpperCase()}
             </text>
           </>
         )}

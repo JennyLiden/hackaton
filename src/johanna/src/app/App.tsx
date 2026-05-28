@@ -615,6 +615,11 @@ export default function App() {
             savedFavorites={savedFavorites}
             openProductList={openProductListOnModal}
             showAfterOrderMessage={showAfterOrderMessage}
+            onOpenFavorites={() => {
+              setSelectedFeature(null);
+              setOpenProductListOnModal(false);
+              setTimeout(() => setFavPanelOpen(true), 300);
+            }}
           />
         )}
       </AnimatePresence>
