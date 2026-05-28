@@ -119,7 +119,7 @@ export function FeatureModal({ feature, onClose, onComplete, completed, onSaveFa
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center px-4 py-10"
         style={{ background: "rgba(10, 30, 10, 0.72)", backdropFilter: "blur(6px)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -127,12 +127,15 @@ export function FeatureModal({ feature, onClose, onComplete, completed, onSaveFa
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         {/* Perspective wrapper */}
-        <div style={{ perspective: "1000px", width: "100%", maxWidth: "420px" }}>
+        <div style={{ perspective: "1000px", width: "100%", maxWidth: "420px", maxHeight: "100%" }}>
           <motion.div
             ref={cardRef}
             className="relative w-full rounded-3xl overflow-hidden shadow-2xl"
             style={{
               background: "white",
+              maxHeight: "calc(100vh - 5rem)",
+              display: "flex",
+              flexDirection: "column",
               rotateX: springX,
               rotateY: springY,
               transformStyle: "preserve-3d",
@@ -155,7 +158,7 @@ export function FeatureModal({ feature, onClose, onComplete, completed, onSaveFa
 
             {/* Header */}
             <div
-              className="relative px-6 pt-6 pb-4"
+              className="relative px-6 pt-6 pb-4 rounded-t-3xl flex-shrink-0"
               style={{ background: `linear-gradient(135deg, ${feature.color}, ${feature.shadowColor})` }}
             >
               {/* 3D depth layer on header */}
@@ -216,7 +219,7 @@ export function FeatureModal({ feature, onClose, onComplete, completed, onSaveFa
             </div>
 
             {/* Body */}
-            <div className="px-6 py-4">
+            <div className="px-6 py-4 overflow-y-auto" style={{ flex: 1, minHeight: 0 }}>
               {/* After-order message banner for Analytics */}
               {showAfterOrderMessage && feature.id === "analytics" && (
                 <motion.div
